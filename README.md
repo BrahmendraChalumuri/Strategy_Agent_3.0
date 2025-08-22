@@ -48,7 +48,7 @@ PERPLEXITY_API_KEY=your-api-key-here
 
 Run the recommendation engine:
 ```bash
-python test2_optimized.py
+python main.py
 ```
 
 The agent will:
@@ -150,7 +150,7 @@ Strategy_Agent_3.0/
 │   └── recommendations_*.json
 ├── reports/                # Generated PDF reports
 │   └── analysis_report_*.pdf
-├── test2_optimized.py      # Main recommendation engine
+├── main.py      # Main recommendation engine
 ├── pdf_report_generator.py # PDF report generator
 ├── requirements.txt        # Python dependencies
 ├── api_keys.env           # API keys configuration
@@ -159,7 +159,7 @@ Strategy_Agent_3.0/
 
 ## Files
 
-- `test2_optimized.py`: Main recommendation engine
+- `main.py`: Main recommendation engine
 - `pdf_report_generator.py`: PDF report generator
 - `data/customer_catalogue_enhanced.csv`: Enhanced customer catalogue with ItemID and QuantityRequired
 - `data/sales_enhanced.csv`: Enhanced sales data with CustomerCatalogueItemID
