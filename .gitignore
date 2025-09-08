@@ -7,6 +7,8 @@ __pycache__/
 # Environment files
 .env
 .env.*
+api_keys.env
+*.env
 
 # Node / build folders
 node_modules/
