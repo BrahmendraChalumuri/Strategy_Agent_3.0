@@ -1,0 +1,260 @@
+{
+  "CustomerInfo": {
+    "CustomerID": "C003",
+    "CustomerName": "Walmart"
+  },
+  "CustomerClassification": {
+    "CustomerType": "CHG Own Sales Customer",
+    "TotalQuantitySold": 10700,
+    "NumberOfStores": 94,
+    "ClassificationCriteria": {
+      "StoresGreaterThan50": true,
+      "QuantityGreaterThan200K": "False",
+      "StoresBetween25And50": false,
+      "QuantityBetween50KAnd200K": "False"
+    }
+  },
+  "AcceptedRecommendations": [
+    {
+      "CustomerCatalogueItemID": "CC111",
+      "ProductName": "Walmart\u00ae Alfredo Sauce Mix",
+      "QuantityRequired": 400,
+      "Ingredients": [
+        " Alfredo Sauce Mix, Milk, Butter, Parmesan cheese, Garlic"
+      ],
+      "CrossSell": [
+        {
+          "Ingredient": "Alfredo Sauce Mix",
+          "SuggestedProduct": "Pioneer\u00ae Alfredo Sauce Mix",
+          "ProductID": "94341",
+          "Similarity": 0.852,
+          "Category": "Gravies",
+          "Price": 6.45,
+          "AIReasoning": "YES. The \"Pioneer\u00ae Alfredo Sauce Mix\" contains ingredients typical for an Alfredo sauce base (e.g., Parmesan cheese, garlic powder, milk derivatives) and matches the \"Alfredo Sauce Mix\" ingredient listed in the Walmart\u00ae Alfredo Sauce Mix recipe, making it suitable as the mix component in the Walmart product[1][2].",
+          "Status": "Accepted"
+        }
+      ]
+    },
+    {
+      "CustomerCatalogueItemID": "CC114",
+      "ProductName": "Walmart\u00ae Sopapilla Mix",
+      "QuantityRequired": 400,
+      "Ingredients": [
+        "Morrison's\u00ae Sopapilla Mix, Eggs, Milk, Oil, Cinnamon sugar"
+      ],
+      "CrossSell": [
+        {
+          "Ingredient": "Morrison's\u00ae Sopapilla Mix",
+          "SuggestedProduct": "Morrison\u2019s\u00ae Sopapilla Mix",
+          "ProductID": "768",
+          "Similarity": 0.998,
+          "Category": "Desserts",
+          "Price": 25.5,
+          "AIReasoning": "YES. Morrison\u2019s\u00ae Sopapilla Mix is explicitly listed as an ingredient in Walmart\u00ae Sopapilla Mix, indicating it is used as a base mix combined with eggs, milk, oil, and cinnamon sugar to make the final product. The ingredient composition and product type align, confirming compatibility[1][3].",
+          "Status": "Accepted"
+        }
+      ]
+    },
+    {
+      "CustomerCatalogueItemID": "CC117",
+      "ProductName": "Walmart\u00ae Waffle Mix",
+      "QuantityRequired": 500,
+      "Ingredients": [
+        " Western Style Buttermilk Pancake & Waffle Mix, Eggs, Milk, Oil, Sugar"
+      ],
+      "CrossSell": [
+        {
+          "Ingredient": "Western Style Buttermilk Pancake & Waffle Mix",
+          "SuggestedProduct": "Pioneer\u00ae Original Buttermilk Pancake & Waffle Mix",
+          "ProductID": "94110",
+          "Similarity": 0.807,
+          "Category": "Baking Mixes",
+          "Price": 31.5,
+          "AIReasoning": "YES. The \"Pioneer\u00ae Original Buttermilk Pancake & Waffle Mix\" is a buttermilk pancake and waffle mix, matching the ingredient \"Western Style Buttermilk Pancake & Waffle Mix\" listed in the Walmart\u00ae Waffle Mix ingredients, making it suitable as an ingredient. Both are pancake and waffle mixes designed for similar use[1][2][3][4].",
+          "Status": "Accepted"
+        },
+        {
+          "Ingredient": "Western Style Buttermilk Pancake & Waffle Mix",
+          "SuggestedProduct": "Pioneer\u00ae Western Style Buttermilk Pancake & Waffle Mix",
+          "ProductID": "94075",
+          "Similarity": 0.897,
+          "Category": "Baking Mixes",
+          "Price": 31.5,
+          "AIReasoning": "YES. The \"Walmart\u00ae Waffle Mix\" lists \"Western Style Buttermilk Pancake & Waffle Mix\" as an ingredient, and \"Pioneer\u00ae Western Style Buttermilk Pancake & Waffle Mix\" matches this description, making it suitable as the ingredient base for the Walmart mix. Both are buttermilk pancake and waffle mixes intended for similar use.",
+          "Status": "Accepted"
+        },
+        {
+          "Ingredient": "Western Style Buttermilk Pancake & Waffle Mix",
+          "SuggestedProduct": "Pioneer\u00ae Morning Bounty Buttermilk Pancake & Waffle Mix",
+          "ProductID": "94152",
+          "Similarity": 0.775,
+          "Category": "Baking Mixes",
+          "Price": 31.5,
+          "AIReasoning": "YES. The \"Pioneer\u00ae Morning Bounty Buttermilk Pancake & Waffle Mix\" matches the description of \"Western Style Buttermilk Pancake & Waffle Mix\" used as an ingredient in Walmart\u00ae Waffle Mix, both being buttermilk pancake and waffle mixes suitable for breakfast recipes[1][2].",
+          "Status": "Accepted"
+        }
+      ]
+    },
+    {
+      "CustomerCatalogueItemID": "CC120",
+      "ProductName": "Walmart\u00ae Flour Tortilla",
+      "QuantityRequired": 700,
+      "Ingredients": [
+        "Conestoga\u2122 Tortilla Pre-Mix, Water, Oil, Salt, Sugar"
+      ],
+      "CrossSell": [
+        {
+          "Ingredient": "Conestoga\u2122 Tortilla Pre-Mix",
+          "SuggestedProduct": "Conestoga\u2122 Tortilla Pre-Mix",
+          "ProductID": "99490",
+          "Similarity": 1.0,
+          "Category": "Tortillas",
+          "Price": 25.3,
+          "AIReasoning": "YES. The \"Walmart\u00ae Flour Tortilla\" lists \"Conestoga\u2122 Tortilla Pre-Mix\" as an ingredient, and this product is a tortilla pre-mix designed specifically for making tortillas by combining it with flour, water, oil, and other ingredients, matching the tortilla preparation process described[1][2].",
+          "Status": "Accepted"
+        },
+        {
+          "Ingredient": "Conestoga\u2122 Tortilla Pre-Mix",
+          "SuggestedProduct": "Conestoga\u2122 Flour Tortilla Mix",
+          "ProductID": "224027",
+          "Similarity": 0.925,
+          "Category": "Tortillas",
+          "Price": 25.5,
+          "AIReasoning": "YES. The \"Conestoga\u2122 Flour Tortilla Mix\" matches the \"Conestoga\u2122 Tortilla Pre-Mix\" ingredient listed for Walmart\u00ae Flour Tortilla, as both contain enriched bleached flour and similar additives for tortilla preparation, confirming compatibility as an ingredient[2][3][5].",
+          "Status": "Accepted"
+        },
+        {
+          "Ingredient": "Conestoga\u2122 Tortilla Pre-Mix",
+          "SuggestedProduct": "Conestoga\u2122 Mi Cocina Flour Tortilla Mix",
+          "ProductID": "224868",
+          "Similarity": 0.857,
+          "Category": "Tortillas",
+          "Price": 25.5,
+          "AIReasoning": "YES. The \"Conestoga\u2122 Mi Cocina Flour Tortilla Mix\" is essentially a flour tortilla pre-mix similar to the \"Conestoga\u2122 Tortilla Pre-Mix\" listed as an ingredient in Walmart\u00ae Flour Tortilla. Both are flour-based mixes designed to be combined with water, oil, and other ingredients to make tortillas[1][5].",
+          "Status": "Accepted"
+        }
+      ]
+    }
+  ],
+  "RejectedRecommendations": [
+    {
+      "CustomerCatalogueItemID": "CC108",
+      "ProductName": "Walmart\u00ae Vanilla Sugar Cookie Mix",
+      "QuantityRequired": 400,
+      "Ingredients": [
+        " Biscuit Mix, Sugar, Vanilla extract, Eggs, Butter"
+      ],
+      "RejectedCrossSell": [
+        {
+          "Ingredient": "Biscuit Mix",
+          "SuggestedProduct": "Conestoga\u2122 Biscuit Mix",
+          "ProductID": "99400",
+          "Similarity": 0.759,
+          "Category": "Biscuits",
+          "Price": 31.5,
+          "AIReasoning": "NO. Conestoga\u2122 Biscuit Mix is formulated primarily for making biscuits with ingredients like enriched bleached flour, palm oil, and leavening agents, which differ from the typical sugar cookie base. It lacks the specific sugar and vanilla components needed for Walmart\u00ae Vanilla Sugar Cookie Mix[1].",
+          "Status": "Rejected"
+        }
+      ]
+    },
+    {
+      "CustomerCatalogueItemID": "CC120",
+      "ProductName": "Walmart\u00ae Flour Tortilla",
+      "QuantityRequired": 700,
+      "Ingredients": [
+        "Conestoga\u2122 Tortilla Pre-Mix, Water, Oil, Salt, Sugar"
+      ],
+      "RejectedCrossSell": [
+        {
+          "Ingredient": "Conestoga\u2122 Tortilla Pre-Mix",
+          "SuggestedProduct": "Conestoga\u2122 Cornbread Mix",
+          "ProductID": "99408",
+          "Similarity": 0.745,
+          "Category": "Baking Mixes",
+          "Price": 31.5,
+          "AIReasoning": "NO. The \"Conestoga\u2122 Cornbread Mix\" is a cornbread baking mix primarily made of enriched yellow corn meal and wheat flour, designed for making cornbread, not tortillas. The Walmart\u00ae Flour Tortilla specifically requires \"Conestoga\u2122 Tortilla Pre-Mix,\" which is a different product formulated for tortillas, not cornbread[1].",
+          "Status": "Rejected"
+        },
+        {
+          "Ingredient": "Conestoga\u2122 Tortilla Pre-Mix",
+          "SuggestedProduct": "Morrison\u2019s\u00ae Tortilla Pre-Mix",
+          "ProductID": "738",
+          "Similarity": 0.765,
+          "Category": "Tortillas",
+          "Price": 24.5,
+          "AIReasoning": "NO. Morrison\u2019s\u00ae Tortilla Pre-Mix is a standalone mix requiring additional flour, shortening, and water to make tortillas, while Walmart\u00ae Flour Tortilla uses Conestoga\u2122 Tortilla Pre-Mix as a direct ingredient. They are different products and not interchangeable as-is. Morrison\u2019s mix is a base mix, not a finished pre-mix ingredient like Conestoga\u2122[3][4].",
+          "Status": "Rejected"
+        },
+        {
+          "Ingredient": "Conestoga\u2122 Tortilla Pre-Mix",
+          "SuggestedProduct": "Conestoga\u2122 Flour Tortilla Dough",
+          "ProductID": "3063",
+          "Similarity": 0.806,
+          "Category": "Tortillas",
+          "Price": 37.5,
+          "AIReasoning": "NO. The Walmart\u00ae Flour Tortilla uses \"Conestoga\u2122 Tortilla Pre-Mix,\" which is a dry mix ingredient, while \"Conestoga\u2122 Flour Tortilla Dough\" is a prepared dough product with added water and oils, not a dry pre-mix suitable as an ingredient in the Walmart tortilla formulation[1][2][4].",
+          "Status": "Rejected"
+        }
+      ]
+    }
+  ],
+  "AlreadyPurchasedRecommendations": [
+    {
+      "CustomerCatalogueItemID": "CC107",
+      "ProductName": "Walmart\u00ae Chocolate Chip Cookie Mix",
+      "QuantityRequired": 500,
+      "Ingredients": [
+        " Biscuit Mix, Chocolate chips, Sugar, Vanilla extract, Eggs"
+      ],
+      "AlreadyPurchasedCrossSell": [
+        {
+          "Ingredient": "Biscuit Mix",
+          "SuggestedProduct": "Pioneer\u00ae Original Biscuit Mix",
+          "ProductID": "94013",
+          "Similarity": 0.742,
+          "Category": "Biscuits",
+          "Price": 31.5,
+          "AIReasoning": "YES. Pioneer\u00ae Original Biscuit Mix is a baking mix primarily made of enriched bleached flour, oil, salt, and minor ingredients, which aligns with the \"Biscuit Mix\" ingredient needed for Walmart\u00ae Chocolate Chip Cookie Mix. It can serve as the biscuit mix base in the cookie mix formulation[1][4][5].",
+          "Status": "Already Purchased"
+        },
+        {
+          "Ingredient": "Biscuit Mix",
+          "SuggestedProduct": "Conestoga\u2122 Biscuit Mix",
+          "ProductID": "99400",
+          "Similarity": 0.759,
+          "Category": "Biscuits",
+          "Price": 31.5,
+          "AIReasoning": "YES. The \"Conestoga\u2122 Biscuit Mix\" contains enriched bleached flour, palm oil, salt, sugar, and leavening agents, which align with the \"Biscuit Mix\" ingredient needed for the Walmart\u00ae Chocolate Chip Cookie Mix. It can serve as the biscuit mix base ingredient in the cookie mix formulation[1][5].",
+          "Status": "Already Purchased"
+        }
+      ]
+    },
+    {
+      "CustomerCatalogueItemID": "CC108",
+      "ProductName": "Walmart\u00ae Vanilla Sugar Cookie Mix",
+      "QuantityRequired": 400,
+      "Ingredients": [
+        " Biscuit Mix, Sugar, Vanilla extract, Eggs, Butter"
+      ],
+      "AlreadyPurchasedCrossSell": [
+        {
+          "Ingredient": "Biscuit Mix",
+          "SuggestedProduct": "Pioneer\u00ae Original Biscuit Mix",
+          "ProductID": "94013",
+          "Similarity": 0.742,
+          "Category": "Biscuits",
+          "Price": 31.5,
+          "AIReasoning": "YES. The \"Pioneer\u00ae Original Biscuit Mix\" is a baking mix primarily made of enriched bleached flour, palm or partially hydrogenated oils, salt, and minor ingredients like corn syrup solids and leavening agents, which aligns with the \"Biscuit Mix\" ingredient needed for the Walmart\u00ae Vanilla Sugar Cookie Mix[1][4][5].",
+          "Status": "Already Purchased"
+        }
+      ]
+    }
+  ],
+  "Summary": {
+    "TotalUpSell": 0,
+    "TotalCrossSell": 8,
+    "TotalRejected": 4,
+    "TotalAlreadyPurchased": 3,
+    "TotalRecommendations": 8
+  }
+}

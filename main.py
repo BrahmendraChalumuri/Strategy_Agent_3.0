@@ -266,7 +266,7 @@ Please answer with ONLY "YES" or "NO" followed by a brief reasoning (max 50 word
         customer_info = self.customers[self.customers['CustomerID'] == customer_id]
         if customer_info.empty:
             print(f"❌ Customer {customer_id} not found!")
-            return
+            return [], [], [], {}
         
         customer_name = customer_info['CustomerName'].iloc[0]
         print(f"📊 Customer: {customer_name}")
@@ -283,7 +283,7 @@ Please answer with ONLY "YES" or "NO" followed by a brief reasoning (max 50 word
         
         if cust_catalogue.empty:
             print(f"❌ No catalogue items found for customer {customer_id}")
-            return
+            return [], [], [], customer_classification
         
         print(f"📋 Found {len(cust_catalogue)} catalogue items")
         print(f"🆕 {len(unsold_products)} products available for cross-sell")
@@ -511,7 +511,13 @@ def main():
     customer_id = input("\nEnter CustomerID: ").strip().upper()
     
     # Generate and display recommendations
-    recommendations, rejected_recommendations, already_purchased_recommendations, customer_classification = engine.generate_recommendations(customer_id)
+    result = engine.generate_recommendations(customer_id)
+    
+    if result is None:
+        print("❌ Error generating recommendations.")
+        return
+    
+    recommendations, rejected_recommendations, already_purchased_recommendations, customer_classification = result
     
     if recommendations or rejected_recommendations or already_purchased_recommendations:
         engine.display_recommendations(recommendations, rejected_recommendations, already_purchased_recommendations, customer_id, customer_classification)
