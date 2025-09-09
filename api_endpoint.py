@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.responses import FileResponse, JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from enum import Enum
 import os
@@ -25,6 +26,16 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc"
 )
+
+# Add CORS middleware to allow all origins
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all HTTP methods
+    allow_headers=["*"],  # Allow all headers
+)
+logger.info("✅ CORS middleware configured to allow all origins")
 
 # Initialize the recommendation engine
 try:
@@ -118,14 +129,20 @@ async def generate_recommendations(request: RecommendationRequest, background_ta
         recommendations_data = {
             "customer_id": request.customer_id,
             "timestamp": timestamp,
-            "recommendations": recommendations,
-            "rejected_recommendations": rejected_recommendations,
-            "already_purchased_recommendations": already_purchased_recommendations,
-            "customer_classification": customer_classification,
-            "summary": {
-                "total_recommendations": len(recommendations),
-                "total_rejected": len(rejected_recommendations),
-                "total_already_purchased": len(already_purchased_recommendations)
+            "CustomerInfo": {
+                "CustomerID": request.customer_id,
+                "CustomerName": get_customer_name(request.customer_id)
+            },
+            "CustomerClassification": customer_classification,
+            "AcceptedRecommendations": recommendations,
+            "RejectedRecommendations": rejected_recommendations,
+            "AlreadyPurchasedRecommendations": already_purchased_recommendations,
+            "Summary": {
+                "TotalUpSell": 0,  # Up-sell is currently disabled
+                "TotalCrossSell": len(recommendations),
+                "TotalRejected": len(rejected_recommendations),
+                "TotalAlreadyPurchased": len(already_purchased_recommendations),
+                "TotalRecommendations": len(recommendations)
             }
         }
         
@@ -155,7 +172,7 @@ async def generate_recommendations(request: RecommendationRequest, background_ta
             "AcceptedRecommendations": recommendations,
             "RejectedRecommendations": rejected_recommendations,
             "AlreadyPurchasedRecommendations": already_purchased_recommendations,
-            "Summary": recommendations_data["summary"],
+            "Summary": recommendations_data["Summary"],
             "files_generated": {
                 "json_file": f"recommendations/recommendations_{request.customer_id}_{timestamp}.json",
                 "pdf_file": f"reports/analysis_report_{request.customer_id}_{timestamp}.pdf",
@@ -206,15 +223,12 @@ async def get_recommendations_json(customer_id: CustomerID):
         else:
             # Return from memory storage
             return {
-                "CustomerInfo": {
-                    "CustomerID": customer_id,
-                    "CustomerName": get_customer_name(customer_id)
-                },
-                "CustomerClassification": recommendations_data["customer_classification"],
-                "AcceptedRecommendations": recommendations_data["recommendations"],
-                "RejectedRecommendations": recommendations_data["rejected_recommendations"],
-                "AlreadyPurchasedRecommendations": recommendations_data["already_purchased_recommendations"],
-                "Summary": recommendations_data["summary"],
+                "CustomerInfo": recommendations_data["CustomerInfo"],
+                "CustomerClassification": recommendations_data["CustomerClassification"],
+                "AcceptedRecommendations": recommendations_data["AcceptedRecommendations"],
+                "RejectedRecommendations": recommendations_data["RejectedRecommendations"],
+                "AlreadyPurchasedRecommendations": recommendations_data["AlreadyPurchasedRecommendations"],
+                "Summary": recommendations_data["Summary"],
                 "GeneratedAt": recommendations_data["timestamp"]
             }
             
