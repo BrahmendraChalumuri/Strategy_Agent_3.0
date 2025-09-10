@@ -278,12 +278,12 @@ async def download_report(customer_id: CustomerID):
                         if not pdf_files:
                             raise HTTPException(
                                 status_code=404,
-                                detail=f"PDF report generation failed for customer {customer_id}."
+                                detail=f"PDF report generation failed for customer {customer_id}. File was not created."
                             )
                     else:
                         raise HTTPException(
                             status_code=500,
-                            detail=f"PDF report generation failed for customer {customer_id}. Please check the logs."
+                            detail=f"PDF report generation failed for customer {customer_id}. Check if pdf_report_generator.py exists and reportlab is installed."
                         )
                 else:
                     raise HTTPException(
@@ -411,23 +411,35 @@ def generate_pdf_report(customer_id: str, recommendations_data: Dict[str, Any]):
         # Ensure reports directory exists
         os.makedirs("reports", exist_ok=True)
         
-        # Import and use the PDF generator
-        from pdf_report_generator import PDFReportGenerator
-        generator = PDFReportGenerator()
-        success = generator.generate_pdf_report(json_filename, pdf_filename)
+        # Check if pdf_report_generator.py exists
+        pdf_generator_path = "pdf_report_generator.py"
+        if not os.path.exists(pdf_generator_path):
+            logger.warning(f"⚠️  PDF report generation skipped (pdf_report_generator.py not found at {os.path.abspath(pdf_generator_path)})")
+            logger.info(f"📁 Current working directory: {os.getcwd()}")
+            logger.info(f"📁 Files in current directory: {os.listdir('.')}")
+            return False
         
-        if success:
-            logger.info(f"📄 PDF report generated: {pdf_filename}")
-            return True
-        else:
-            logger.error(f"❌ Failed to generate PDF report: {pdf_filename}")
+        # Import and use the PDF generator
+        try:
+            from pdf_report_generator import PDFReportGenerator
+            generator = PDFReportGenerator()
+            success = generator.generate_pdf_report(json_filename, pdf_filename)
+            
+            if success:
+                logger.info(f"📄 PDF report generated: {pdf_filename}")
+                return True
+            else:
+                logger.error(f"❌ Failed to generate PDF report: {pdf_filename}")
+                return False
+                
+        except ImportError as import_err:
+            logger.error(f"❌ Import error for PDF generator: {str(import_err)}")
+            logger.info("💡 Make sure reportlab is installed: pip install reportlab")
             return False
             
-    except ImportError:
-        logger.warning("⚠️  PDF report generation skipped (pdf_report_generator.py not found)")
-        return False
     except Exception as e:
         logger.error(f"❌ Error generating PDF report: {str(e)}")
+        logger.error(f"❌ Error type: {type(e).__name__}")
         return False
 
 def get_customer_name(customer_id: str) -> str:
