@@ -585,7 +585,8 @@ async def regenerate_all_recommendations(request: RegenerateRequest, background_
     
     - **force_regenerate**: Whether to force regeneration (default: True)
     
-    Deletes all existing JSON and PDF files and regenerates recommendations for all customers.
+    Generates new recommendations for each customer, then immediately deletes old files for that customer after successful generation.
+    Returns an array containing the complete recommendation data for all customers.
     """
     if not engine:
         raise HTTPException(
@@ -596,17 +597,11 @@ async def regenerate_all_recommendations(request: RegenerateRequest, background_
     try:
         logger.info("🔄 Starting regeneration of recommendations for all customers...")
         
-        # Clear existing files
-        await clear_all_recommendation_files()
-        
-        # Clear memory storage
-        recommendations_storage.clear()
-        
         # Get all available customers
         customer_ids = list(engine.customer_lookup.keys())
         logger.info(f"📋 Regenerating for {len(customer_ids)} customers: {customer_ids}")
         
-        # Generate recommendations for all customers
+        # Generate recommendations for all customers first (before deleting old files)
         success_count = 0
         failed_count = 0
         results = {}
@@ -663,6 +658,13 @@ async def regenerate_all_recommendations(request: RegenerateRequest, background_
                 # Store in memory
                 recommendations_storage[str(customer_id)] = recommendations_data
                 
+                # Extract customer ID string for deletion
+                customer_id_str = str(customer_id).split('.')[-1] if '.' in str(customer_id) else str(customer_id)
+                
+                # Immediately delete old files for this customer after successful generation
+                logger.info(f"🗑️  Deleting old recommendation files for customer {customer_id}...")
+                await clear_old_customer_recommendation_files(customer_id, timestamp)
+                
                 success_count += 1
                 results[customer_id] = {
                     "success": True,
@@ -679,14 +681,24 @@ async def regenerate_all_recommendations(request: RegenerateRequest, background_
                 results[customer_id] = {"success": False, "error": str(e)}
         
         logger.info(f"🎉 Regeneration completed: {success_count} successful, {failed_count} failed")
+        logger.info(f"🗑️  Old files were deleted immediately after each customer's successful generation")
+        
+        # Return array of all recommendation data (similar to GET /recommendations/all)
+        all_recommendations = []
+        for customer_id_str, data in recommendations_storage.items():
+            converted_data = convert_numpy_types(data)
+            all_recommendations.append(converted_data)
+        
+        # Sort by customer ID for consistent ordering
+        all_recommendations.sort(key=lambda x: x.get('CustomerInfo', {}).get('CustomerID', ''))
         
         return {
             "success": True,
-            "message": f"Regenerated recommendations for {len(customer_ids)} customers",
+            "message": f"Successfully regenerated recommendations for {success_count} customers",
+            "total_customers": len(all_recommendations),
             "successful_customers": success_count,
             "failed_customers": failed_count,
-            "results": results,
-            "timestamp": datetime.now().strftime("%Y%m%d_%H%M%S")
+            "recommendations": all_recommendations
         }
         
     except Exception as e:
@@ -704,7 +716,8 @@ async def regenerate_customer_recommendations(customer_id: CustomerID, request: 
     - **customer_id**: Customer ID (C001, C002, or C003)
     - **force_regenerate**: Whether to force regeneration (default: True)
     
-    Deletes existing JSON and PDF files for the customer and regenerates recommendations.
+    Generates new recommendations first, then deletes old JSON and PDF files only after successful generation.
+    Returns the complete recommendation data for the customer.
     """
     if not engine:
         raise HTTPException(
@@ -715,16 +728,10 @@ async def regenerate_customer_recommendations(customer_id: CustomerID, request: 
     try:
         logger.info(f"🔄 Starting regeneration of recommendations for customer {customer_id}...")
         
-        # Clear existing files for this customer
-        await clear_customer_recommendation_files(customer_id)
-        
-        # Remove from memory storage
         # Extract just the value part from the enum (e.g., "C001" from CustomerID.C001)
         customer_id_str = str(customer_id).split('.')[-1] if '.' in str(customer_id) else str(customer_id)
-        if customer_id_str in recommendations_storage:
-            del recommendations_storage[customer_id_str]
         
-        # Generate recommendations
+        # Generate recommendations first (before deleting old files)
         start_time = time.time()
         result = await engine.generate_recommendations(customer_id)
         
@@ -769,20 +776,21 @@ async def regenerate_customer_recommendations(customer_id: CustomerID, request: 
         # Generate PDF report
         await generate_pdf_report(customer_id, recommendations_data)
         
-        # Store in memory
+        # Now that new recommendations are successfully generated, delete old files
+        logger.info(f"🗑️  Deleting old recommendation files for customer {customer_id}...")
+        await clear_old_customer_recommendation_files(customer_id, timestamp)
+        
+        # Remove old data from memory storage (if it existed)
+        if customer_id_str in recommendations_storage:
+            del recommendations_storage[customer_id_str]
+        
+        # Store the new data in memory
         recommendations_storage[customer_id_str] = recommendations_data
         
         logger.info(f"✅ Successfully regenerated recommendations for {customer_id} in {processing_time:.2f}s")
         
-        return {
-            "success": True,
-            "message": f"Regenerated recommendations for customer {customer_id}",
-            "customer_id": customer_id,
-            "processing_time": processing_time,
-            "recommendations_count": len(recommendations),
-            "timestamp": timestamp,
-            "performance_stats": engine.performance_stats
-        }
+        # Return the actual recommendation data instead of just success message
+        return convert_numpy_types(recommendations_data)
         
     except HTTPException:
         raise
@@ -1016,6 +1024,88 @@ async def clear_customer_recommendation_files(customer_id: str):
         
     except Exception as e:
         logger.error(f"❌ Error clearing files for customer {customer_id}: {str(e)}")
+
+async def clear_old_customer_recommendation_files(customer_id: str, exclude_timestamp: str):
+    """Clear old recommendation files for a specific customer, excluding the newly generated ones"""
+    try:
+        # Ensure customer_id is a string
+        # Extract just the value part from the enum (e.g., "C001" from CustomerID.C001)
+        customer_id_str = str(customer_id).split('.')[-1] if '.' in str(customer_id) else str(customer_id)
+        
+        deleted_count = 0
+        
+        # Clear old JSON files for customer (excluding the new one)
+        json_pattern = f"recommendations/recommendations_{customer_id_str}_*.json"
+        json_files = glob.glob(json_pattern)
+        for file in json_files:
+            # Check if this is NOT the newly generated file
+            if exclude_timestamp not in file:
+                os.remove(file)
+                deleted_count += 1
+                logger.info(f"🗑️  Deleted old JSON file: {os.path.basename(file)}")
+        
+        # Clear old PDF files for customer (excluding the new one)
+        pdf_pattern = f"reports/analysis_report_{customer_id_str}_*.pdf"
+        pdf_files = glob.glob(pdf_pattern)
+        for file in pdf_files:
+            # Check if this is NOT the newly generated file
+            if exclude_timestamp not in file:
+                os.remove(file)
+                deleted_count += 1
+                logger.info(f"🗑️  Deleted old PDF file: {os.path.basename(file)}")
+        
+        logger.info(f"🗑️  Cleared {deleted_count} old recommendation files for customer {customer_id_str}")
+        
+    except Exception as e:
+        logger.error(f"❌ Error clearing old files for customer {customer_id}: {str(e)}")
+
+async def clear_old_all_recommendation_files(exclude_timestamps: dict):
+    """Clear old recommendation files for all customers, excluding the newly generated ones"""
+    try:
+        total_deleted = 0
+        
+        # Clear old JSON files (excluding the new ones)
+        json_pattern = "recommendations/recommendations_*.json"
+        json_files = glob.glob(json_pattern)
+        for file in json_files:
+            filename = os.path.basename(file)
+            # Extract customer ID and timestamp from filename
+            parts = filename.replace("recommendations_", "").replace(".json", "").split("_")
+            if len(parts) >= 2:
+                customer_id = parts[0]
+                file_timestamp = "_".join(parts[1:])
+                
+                # Check if this file should be excluded (it's a newly generated one)
+                if customer_id in exclude_timestamps and exclude_timestamps[customer_id] == file_timestamp:
+                    continue  # Skip this file, it's newly generated
+                
+                os.remove(file)
+                total_deleted += 1
+                logger.info(f"🗑️  Deleted old JSON file: {filename}")
+        
+        # Clear old PDF files (excluding the new ones)
+        pdf_pattern = "reports/analysis_report_*.pdf"
+        pdf_files = glob.glob(pdf_pattern)
+        for file in pdf_files:
+            filename = os.path.basename(file)
+            # Extract customer ID and timestamp from filename
+            parts = filename.replace("analysis_report_", "").replace(".pdf", "").split("_")
+            if len(parts) >= 2:
+                customer_id = parts[0]
+                file_timestamp = "_".join(parts[1:])
+                
+                # Check if this file should be excluded (it's a newly generated one)
+                if customer_id in exclude_timestamps and exclude_timestamps[customer_id] == file_timestamp:
+                    continue  # Skip this file, it's newly generated
+                
+                os.remove(file)
+                total_deleted += 1
+                logger.info(f"🗑️  Deleted old PDF file: {filename}")
+        
+        logger.info(f"🗑️  Cleared {total_deleted} old recommendation files for all customers")
+        
+    except Exception as e:
+        logger.error(f"❌ Error clearing old files for all customers: {str(e)}")
 
 def get_customer_name(customer_id: str) -> str:
     """Get customer name from the engine"""
