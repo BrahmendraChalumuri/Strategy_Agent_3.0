@@ -124,6 +124,8 @@ asyncio.run(main())
 ### Recommendations
 - `GET /recommendations/{customer_id}/json` - Get JSON recommendations for a customer
 - `GET /recommendations/{customer_id}/download` - Download PDF report for a customer
+- `GET /recommendations/all` - Get all customer recommendations as JSON objects array
+- `GET /recommendations/download/all` - Download combined PDF with all customer reports
 - `POST /regenerate_recommendations/{customer_id}` - Regenerate recommendations for a specific customer
 - `POST /regenerate_recommendations` - Regenerate recommendations for all customers
 

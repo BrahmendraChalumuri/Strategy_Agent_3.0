@@ -455,6 +455,129 @@ async def list_existing_recommendations():
             detail=f"Error listing recommendations: {str(e)}"
         )
 
+@app.get("/recommendations/all", response_model=Dict[str, Any])
+async def get_all_recommendations_json():
+    """
+    Get all customer recommendations as JSON objects array
+    
+    Returns an array containing the complete recommendation data for all customers.
+    """
+    try:
+        all_recommendations = []
+        
+        # Get all JSON files in recommendations directory
+        json_pattern = "recommendations/recommendations_*.json"
+        json_files = glob.glob(json_pattern)
+        
+        if not json_files:
+            return {
+                "success": True,
+                "message": "No recommendation files found",
+                "total_customers": 0,
+                "recommendations": []
+            }
+        
+        for json_file in json_files:
+            try:
+                # Load JSON data
+                with open(json_file, 'r') as f:
+                    json_data = json.load(f)
+                
+                # Convert numpy types and add to array
+                converted_data = convert_numpy_types(json_data)
+                all_recommendations.append(converted_data)
+                
+            except Exception as e:
+                logger.warning(f"⚠️  Error loading file {json_file}: {str(e)}")
+                continue
+        
+        # Sort by customer ID for consistent ordering
+        all_recommendations.sort(key=lambda x: x.get('CustomerInfo', {}).get('CustomerID', ''))
+        
+        logger.info(f"✅ Loaded {len(all_recommendations)} customer recommendation files")
+        
+        return {
+            "success": True,
+            "message": f"Successfully loaded {len(all_recommendations)} customer recommendations",
+            "total_customers": len(all_recommendations),
+            "recommendations": all_recommendations
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Error loading all recommendations: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error loading all recommendations: {str(e)}"
+        )
+
+@app.get("/recommendations/download/all")
+async def download_all_reports_combined():
+    """
+    Download a combined PDF containing all customer analysis reports
+    
+    Returns a single PDF file that contains all customer analysis reports merged together.
+    """
+    try:
+        # Get all PDF files in reports directory
+        pdf_pattern = "reports/analysis_report_*.pdf"
+        pdf_files = glob.glob(pdf_pattern)
+        
+        if not pdf_files:
+            raise HTTPException(
+                status_code=404,
+                detail="No PDF reports found. Please generate recommendations first."
+            )
+        
+        # Sort by creation time to get the most recent files for each customer
+        pdf_files.sort(key=os.path.getctime, reverse=True)
+        
+        # Group by customer ID to get the latest report for each customer
+        customer_pdfs = {}
+        for pdf_file in pdf_files:
+            filename = os.path.basename(pdf_file)
+            # Extract customer ID from filename: analysis_report_C001_timestamp.pdf
+            parts = filename.replace("analysis_report_", "").replace(".pdf", "").split("_")
+            if len(parts) >= 2:
+                customer_id = parts[0]
+                if customer_id not in customer_pdfs:
+                    customer_pdfs[customer_id] = pdf_file
+        
+        if not customer_pdfs:
+            raise HTTPException(
+                status_code=404,
+                detail="No valid PDF reports found for customers."
+            )
+        
+        # Create combined PDF
+        combined_pdf_path = await create_combined_pdf(list(customer_pdfs.values()))
+        
+        if not combined_pdf_path or not os.path.exists(combined_pdf_path):
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to create combined PDF report."
+            )
+        
+        # Generate filename with timestamp
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"all_customers_analysis_report_{timestamp}.pdf"
+        
+        logger.info(f"✅ Created combined PDF with {len(customer_pdfs)} customer reports")
+        
+        return FileResponse(
+            path=combined_pdf_path,
+            media_type='application/pdf',
+            filename=filename
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Error creating combined PDF: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error creating combined PDF: {str(e)}"
+        )
+
 @app.post("/regenerate_recommendations", response_model=Dict[str, Any])
 async def regenerate_all_recommendations(request: RegenerateRequest, background_tasks: BackgroundTasks):
     """
@@ -905,6 +1028,48 @@ def get_customer_name(customer_id: str) -> str:
         return "Unknown"
     except:
         return "Unknown"
+
+async def create_combined_pdf(pdf_files: List[str]) -> str:
+    """Create a combined PDF from multiple PDF files"""
+    try:
+        from PyPDF2 import PdfMerger
+        import tempfile
+        
+        # Create a temporary file for the combined PDF
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        combined_filename = f"reports/combined_analysis_report_{timestamp}.pdf"
+        
+        # Ensure reports directory exists
+        os.makedirs("reports", exist_ok=True)
+        
+        # Create PDF merger
+        merger = PdfMerger()
+        
+        # Add each PDF to the merger
+        for pdf_file in pdf_files:
+            if os.path.exists(pdf_file):
+                try:
+                    merger.append(pdf_file)
+                    logger.info(f"📄 Added {os.path.basename(pdf_file)} to combined PDF")
+                except Exception as e:
+                    logger.warning(f"⚠️  Error adding {pdf_file} to combined PDF: {str(e)}")
+                    continue
+        
+        # Write the combined PDF
+        with open(combined_filename, 'wb') as output_file:
+            merger.write(output_file)
+        
+        merger.close()
+        
+        logger.info(f"✅ Created combined PDF: {combined_filename}")
+        return combined_filename
+        
+    except ImportError:
+        logger.error("❌ PyPDF2 not installed. Please install it: pip install PyPDF2")
+        return None
+    except Exception as e:
+        logger.error(f"❌ Error creating combined PDF: {str(e)}")
+        return None
 
 # Error handlers
 @app.exception_handler(HTTPException)
